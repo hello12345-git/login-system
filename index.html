@@ -150,30 +150,30 @@
         document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
     }
 
-    function handleSignup() {
-        const email = document.getElementById('signup-email').value;
-        const username = document.getElementById('signup-username').value;
-        const password = document.getElementById('signup-password').value;
-        const errorEl = document.getElementById('signup-error');
+    async function handleSignup() {
+    const email = document.getElementById('signup-email').value;
+    const username = document.getElementById('signup-username').value;
+    const password = document.getElementById('signup-password').value;
+    const errorEl = document.getElementById('signup-error');
 
-        if (!email || !username || !password) {
-            errorEl.innerText = "Please fill out all fields.";
-            errorEl.style.display = 'block';
-            return;
-        }
+    // Call the Node.js backend
+    const response = await fetch('http://localhost:3000/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, username, password })
+    });
 
-        // Mock temporary email detection
-        const domain = email.split('@');
-        if (blockedDomains.includes(domain)) {
-            errorEl.innerText = "Temporary or disposable emails are not allowed.";
-            errorEl.style.display = 'block';
-            return;
-        }
+    const data = await response.json();
 
-        // If validation passes, move to verification
-        alert(`In a real app, an email with a code would be sent to ${email} via your backend server.`);
+    if (!response.ok) {
+        errorEl.innerText = data.error;
+        errorEl.style.display = 'block';
+    } else {
+        // Save email temporarily in frontend so we know who is verifying
+        sessionStorage.setItem('verifyingEmail', email); 
         switchScreen('verification-screen');
     }
+}
 
     function handleVerify() {
         const code = document.getElementById('verify-code').value;
